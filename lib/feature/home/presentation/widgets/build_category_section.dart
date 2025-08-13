@@ -15,7 +15,9 @@ class BuildCategorySection extends StatelessWidget {
         return CategorySection(
           selectedCategory: state.category,
           onCategorySelected: (category) {
-            context.read<NewsBloc>().add(NewsCategorySelected(category));
+            context.read<NewsBloc>().add(
+              NewsCategorySelected(category: category),
+            );
           },
           categories: const [
             'All',

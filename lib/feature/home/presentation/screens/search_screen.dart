@@ -55,6 +55,7 @@ class _SearchScreenState extends State<SearchScreen> {
       ),
       body: BlocBuilder<NewsBloc, NewsState>(
         builder: (context, state) {
+          // Loading state
           if (state is NewsLoading) {
             return ListView.builder(
               itemCount: 5,
@@ -76,39 +77,154 @@ class _SearchScreenState extends State<SearchScreen> {
             );
           }
 
+          // Error state
           if (state is NewsError) {
-            return Center(child: Text(state.message));
-          }
-
-          if (state is NewsLoaded && state.articles.isNotEmpty) {
-            return ListView.builder(
-              itemCount: state.articles.length,
-              itemBuilder: (context, index) {
-                final article = state.articles[index];
-                return CustomListTile(
-                  article: article,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder:
-                            (context) => ArticleDetailsScreen(article: article),
-                      ),
-                    );
-                  },
-                );
+            return RefreshIndicator(
+              onRefresh: () async {
+                if (_searchController.text.length >= 3) {
+                  context.read<NewsBloc>().add(
+                    SearchNews(query: _searchController.text),
+                  );
+                }
               },
+              child: ListView(
+                children: [
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+                  Center(
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 64.sp,
+                          color: Colors.grey,
+                        ),
+                        SizedBox(height: 16.h),
+                        Text(
+                          'Error searching news',
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                        SizedBox(height: 8.h),
+                        Text(
+                          state.message,
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: Colors.grey[600],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             );
           }
 
-          return Center(
-            child: Text(
-              'No results found',
-              style: TextStyle(
-                fontSize: 16.sp,
-                color: Colors.grey,
-                fontFamily: 'Poppins',
+          // Loaded state with search results
+          if (state is NewsLoaded) {
+            // No search results found
+            if (state.articles.isEmpty) {
+              return RefreshIndicator(
+                onRefresh: () async {
+                  if (_searchController.text.length >= 3) {
+                    context.read<NewsBloc>().add(
+                      SearchNews(query: _searchController.text),
+                    );
+                  }
+                },
+                child: ListView(
+                  children: [
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+                    Center(
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.search_off,
+                            size: 64.sp,
+                            color: Colors.grey,
+                          ),
+                          SizedBox(height: 16.h),
+                          Text(
+                            'No results found',
+                            style: TextStyle(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                          SizedBox(height: 8.h),
+                          Text(
+                            'Try different keywords or check spelling',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              color: Colors.grey[600],
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            // Search results available
+            return RefreshIndicator(
+              onRefresh: () async {
+                if (_searchController.text.length >= 3) {
+                  context.read<NewsBloc>().add(
+                    SearchNews(query: _searchController.text),
+                  );
+                }
+              },
+              child: ListView.builder(
+                itemCount: state.articles.length,
+                itemBuilder: (context, index) {
+                  final article = state.articles[index];
+                  return CustomListTile(
+                    article: article,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) =>
+                                  ArticleDetailsScreen(article: article),
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
+            );
+          }
+
+          // Initial state - show search prompt
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.search, size: 64.sp, color: Colors.grey[400]),
+                SizedBox(height: 16.h),
+                Text(
+                  'Search for news articles',
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  'Type at least 3 characters to search',
+                  style: TextStyle(fontSize: 14.sp, color: Colors.grey[500]),
+                ),
+              ],
             ),
           );
         },

@@ -6,18 +6,21 @@ import 'package:digital_hub_news_app_task/feature/home/logic/news_bloc/news_stat
 class NewsBloc extends Bloc<NewsEvent, NewsState> {
   final NewsRepository repository;
   String _currentCategory = 'all';
+
   NewsBloc({required this.repository}) : super(const NewsInitial()) {
     on<FetchNews>((event, emit) async {
       try {
         final category = event.category.toLowerCase();
         _currentCategory = category;
         emit(NewsLoading(category));
+
+        // Use the repository which handles the API call
         final articles = await repository.getTopHeadlinesByCategory(category);
 
         final updatedArticles =
             articles.map((article) {
               return article.copyWith(
-                category: category == 'all' ? article.category : category,
+                category: category == 'all' ? 'general' : category,
               );
             }).toList();
 

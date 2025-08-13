@@ -2,12 +2,14 @@ abstract class NewsEvent {}
 
 class FetchNews extends NewsEvent {
   final String category;
-  FetchNews({this.category = 'general'});
+
+  FetchNews({required this.category});
 }
 
 class NewsCategorySelected extends NewsEvent {
   final String category;
-  NewsCategorySelected(this.category);
+
+  NewsCategorySelected({required this.category});
 }
 
 class SearchNews extends NewsEvent {
