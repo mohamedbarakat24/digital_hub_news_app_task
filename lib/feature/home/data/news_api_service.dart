@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 
 class NewsApiService {
   static const String _baseUrl = 'https://newsapi.org/v2/top-headlines';
-  static const String _apiKey = '';
+  static const String _apiKey = '1690f32140664811b53d4c89e7e7bb23';
   static const String _country = 'us';
 
   final Dio _dio;
